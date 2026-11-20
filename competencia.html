@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>OME Sport &mdash; Competencia</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a1628;--surface:#112240;--surface2:#1a2f4a;--border:#1e3a5f;
+  --accent:#1559b0;--accent2:#1e7bd4;--gold:#f5c518;--silver:#b0b8c8;--bronze:#cd7f32;
+  --green:#22c55e;--red:#ef4444;--text:#e8edf5;--muted:#6b7fa0;
+  --radius:14px;--radius-sm:8px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ======== SCREENS ======== */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ======== HEADER ======== */
+.app-header{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1rem;display:flex;align-items:center;gap:.7rem;position:sticky;top:0;z-index:100}
+.app-header .logo{font-size:1.4rem}
+.app-header h1{font-size:1rem;font-weight:700;line-height:1.1}
+.app-header h1 small{font-weight:400;color:var(--muted);font-size:.75rem;display:block}
+.header-actions{margin-left:auto;display:flex;gap:.5rem;align-items:center}
+
+/* ======== BUTTONS ======== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:var(--radius-sm);border:none;cursor:pointer;font-size:.88rem;font-weight:600;transition:all .15s;white-space:nowrap;user-select:none}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+.btn-danger{background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b}
+.btn-danger:hover{background:#991b1b}
+.btn-green{background:#14532d;color:#86efac;border:1px solid #166534}
+.btn-green:hover{background:#166534}
+.btn-sm{padding:.35rem .75rem;font-size:.8rem}
+.btn-icon{padding:.45rem;border-radius:50%;width:36px;height:36px}
+.btn-disabled{opacity:.4;pointer-events:none}
+
+/* ======== CARDS ======== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem}
+.card+.card{margin-top:.8rem}
+
+/* ======== INPUTS ======== */
+.input-group{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.9rem}
+.input-group label{font-size:.78rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.inp{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.6rem .85rem;color:var(--text);font-size:.92rem;width:100%;transition:border-color .15s}
+.inp:focus{outline:none;border-color:var(--accent2)}
+.inp::placeholder{color:var(--muted)}
+
+/* ======== TOAST ======== */
+#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(120px);background:#1e3a5f;color:var(--text);padding:.6rem 1.4rem;border-radius:40px;font-size:.87rem;font-weight:600;z-index:9999;transition:transform .3s;box-shadow:0 4px 24px rgba(0,0,0,.5)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ======== MODAL ======== */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;padding:1rem}
+.modal-ov.open{display:flex}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;width:100%;max-width:420px;max-height:92vh;overflow-y:auto}
+.modal-title{font-size:1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.modal-actions{display:flex;gap:.6rem;margin-top:1rem;justify-content:flex-end}
+
+/* ======== SCREEN: HOME ======== */
+#screen-home{align-items:center;justify-content:center;text-align:center;padding:2rem 1rem;gap:1.5rem}
+#screen-home .logo-big{font-size:4rem;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+#screen-home h2{font-size:1.5rem;font-weight:800}
+#screen-home p{color:var(--muted);max-width:280px;line-height:1.5}
+.home-btns{display:flex;flex-direction:column;gap:.7rem;width:100%;max-width:300px}
+.home-btns .btn{width:100%;padding:.75rem;font-size:.95rem}
+
+/* ======== SCREEN: SETUP ======== */
+#screen-setup .content{padding:1rem;max-width:600px;margin:0 auto;width:100%}
+.section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.6rem;margin-top:1.2rem}
+.section-title:first-child{margin-top:0}
+.carriles-list{display:flex;flex-direction:column;gap:.6rem}
+.carril-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;display:flex;align-items:center;gap:.7rem}
+.carril-item .carril-num{background:var(--accent);color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+.carril-item .carril-info{flex:1;min-width:0}
+.carril-item .carril-name{font-weight:700;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.carril-item .carril-swimmers{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.carril-item .carril-actions{display:flex;gap:.4rem;flex-shrink:0}
+
+/* ======== SCREEN: CARRIL (contador) ======== */
+#screen-carril{align-items:center;background:var(--bg)}
+#screen-carril .carril-header{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1rem;width:100%;display:flex;align-items:center;gap:.7rem;position:sticky;top:0}
+#screen-carril .carril-header .back-btn{color:var(--muted);cursor:pointer;font-size:1.3rem;user-select:none}
+#screen-carril .carril-header .carril-title{font-weight:700;font-size:1rem}
+#screen-carril .carril-header .carril-subtitle{font-size:.75rem;color:var(--muted)}
+.counter-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:1.5rem;width:100%;max-width:400px;margin:0 auto}
+.counter-label{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700}
+.counter-num{font-size:9rem;font-weight:900;line-height:1;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 0 60px rgba(21,89,176,.6)}
+.counter-unit{font-size:.85rem;color:var(--muted)}
+.btn-plus{width:min(240px,70vw);height:min(240px,70vw);border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-size:5rem;font-weight:900;cursor:pointer;box-shadow:0 8px 40px rgba(21,89,176,.5);transition:transform .1s,box-shadow .1s;user-select:none;display:flex;align-items:center;justify-content:center;margin:1rem auto}
+.btn-plus:active{transform:scale(.92);box-shadow:0 2px 16px rgba(21,89,176,.3)}
+.counter-undo{font-size:.78rem;color:var(--muted);cursor:pointer;text-decoration:underline;user-select:none}
+.counter-undo:hover{color:var(--text)}
+.ranking-mini{width:100%;max-width:400px;padding:0 1rem 1.5rem;margin:0 auto}
+.ranking-mini .r-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.5rem;font-weight:700}
+.r-row{display:flex;align-items:center;gap:.6rem;padding:.4rem .6rem;border-radius:var(--radius-sm);background:var(--surface)}
+.r-row+.r-row{margin-top:.35rem}
+.r-row.active-row{background:var(--accent);box-shadow:0 2px 12px rgba(21,89,176,.4)}
+.r-pos{font-size:.75rem;font-weight:700;width:18px;text-align:center;flex-shrink:0}
+.r-name{flex:1;font-size:.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r-vueltas{font-size:.82rem;font-weight:700;color:var(--gold)}
+.r-row.active-row .r-vueltas{color:#fff}
+
+/* ======== SCREEN: RANKING ======== */
+#screen-ranking .content{padding:1rem;max-width:600px;margin:0 auto;width:100%}
+.ranking-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.ranking-row{display:flex;align-items:center;gap:.8rem;padding:.85rem 1rem;border-bottom:1px solid var(--border)}
+.ranking-row:last-child{border-bottom:none}
+.ranking-row.pos-1{background:linear-gradient(90deg,rgba(245,197,24,.1),transparent)}
+.ranking-row.pos-2{background:linear-gradient(90deg,rgba(176,184,200,.07),transparent)}
+.ranking-row.pos-3{background:linear-gradient(90deg,rgba(205,127,50,.07),transparent)}
+.rank-medal{font-size:1.3rem;width:30px;text-align:center;flex-shrink:0}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-weight:700;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-swimmers{font-size:.75rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-vueltas{font-size:1.4rem;font-weight:900;color:var(--gold)}
+.rank-vueltas small{font-size:.65rem;font-weight:400;color:var(--muted);display:block;text-align:right}
+
+/* ======== NADADORES SELECTOR ======== */
+.search-wrap{position:relative;margin-bottom:.8rem}
+.search-wrap .inp{padding-left:2.2rem}
+.search-wrap .search-ico{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.9rem;pointer-events:none}
+.swimmers-list{max-height:260px;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2)}
+.swimmer-opt{display:flex;align-items:center;gap:.7rem;padding:.55rem .85rem;cursor:pointer;transition:background .1s}
+.swimmer-opt:hover{background:var(--border)}
+.swimmer-opt .s-check{width:16px;height:16px;border-radius:3px;border:1.5px solid var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem}
+.swimmer-opt.selected .s-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.swimmer-opt .s-name{font-size:.87rem}
+.selected-tags{display:flex;flex-wrap:wrap;gap:.4rem;min-height:28px;margin-bottom:.5rem}
+.tag{background:var(--accent);color:#fff;border-radius:20px;padding:.25rem .7rem;font-size:.75rem;font-weight:600;display:flex;align-items:center;gap:.35rem;cursor:pointer}
+.tag .tag-x{opacity:.7;font-size:.8rem}
+.tag:hover .tag-x{opacity:1}
+.empty-msg{padding:1rem;text-align:center;color:var(--muted);font-size:.82rem}
+
+/* ======== PIN MODAL ======== */
+.pin-dots{display:flex;justify-content:center;gap:.7rem;margin:1rem 0}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);transition:all .2s}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;max-width:260px;margin:0 auto}
+.pin-key{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.9rem;font-size:1.3rem;font-weight:700;cursor:pointer;user-select:none;transition:background .1s;text-align:center}
+.pin-key:active{background:var(--accent)}
+.pin-error{color:#f87171;text-align:center;font-size:.82rem;min-height:1.2rem;margin-top:.3rem}
+
+/* ======== CONFETTI (simple css) ======== */
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:9000;overflow:hidden}
+.confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+/* ======== RESPONSIVE ======== */
+@media(min-width:600px){
+  .btn-plus{width:200px;height:200px;font-size:4rem}
+  .counter-num{font-size:11rem}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ======== SCREEN: HOME ======== -->
+<div id="screen-home" class="screen active">
+  <div class="logo-big">&#127942;</div>
+  <h2>OME Sport<br>Competencia</h2>
+  <p>Crea carriles con tus nadadores y lleva el conteo de vueltas en tiempo real.</p>
+  <div class="home-btns">
+    <button class="btn btn-primary" onclick="irSetup()">&#9881; Configurar competencia</button>
+    <button class="btn btn-ghost" onclick="irRanking()">&#127942; Ver ranking</button>
+  </div>
+  <p style="font-size:.72rem;color:var(--muted);margin-top:.5rem">Configurar requiere contrase&#241;a de admin</p>
+</div>
+
+<!-- ======== SCREEN: SETUP ======== -->
+<div id="screen-setup" class="screen">
+  <div class="app-header">
+    <span class="logo">&#9881;</span>
+    <div>
+      <h1>Configurar<small>Carriles y nadadores</small></h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-sm btn-danger" onclick="pedirPinAccion('reset',null)">&#8635; Resetear</button>
+      <button class="btn btn-sm btn-ghost" onclick="irHome()">Salir</button>
+    </div>
+  </div>
+  <div class="content" style="padding:1rem;max-width:600px;margin:0 auto;width:100%">
+    <div class="section-title">Carriles activos</div>
+    <div id="carriles-lista" class="carriles-list">
+      <div class="empty-msg">Sin carriles creados.</div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:1rem;width:100%" onclick="abrirModalCarril(null)">&#43; Nuevo carril</button>
+
+    <div class="section-title" style="margin-top:1.8rem">Acciones r&#225;pidas</div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+      <button class="btn btn-green btn-sm" onclick="irRanking()">&#127942; Ver ranking</button>
+      <button class="btn btn-ghost btn-sm" onclick="irHome()">&#8592; Inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== SCREEN: CARRIL (contador) ======== -->
+<div id="screen-carril" class="screen">
+  <div class="carril-header">
+    <span class="back-btn" onclick="irHome()">&#8592;</span>
+    <div>
+      <div class="carril-title" id="cnt-carril-name">Carril</div>
+      <div class="carril-subtitle" id="cnt-carril-swimmers"></div>
+    </div>
+    <div style="margin-left:auto">
+      <button class="btn btn-ghost btn-sm" onclick="irRanking()">&#127942;</button>
+    </div>
+  </div>
+  <div class="counter-area">
+    <div class="counter-label">Vueltas</div>
+    <div class="counter-num" id="cnt-num">0</div>
+    <div class="counter-unit">vuelta<span id="cnt-unit-s">s</span></div>
+    <button class="btn-plus" id="btn-plus" onclick="sumarVuelta()">+1</button>
+    <span class="counter-undo" onclick="restarVuelta()">&#8592; Deshacer &#250;ltima vuelta</span>
+  </div>
+  <div class="ranking-mini">
+    <div class="r-title">&#127942; Ranking en vivo</div>
+    <div id="cnt-ranking"></div>
+  </div>
+</div>
+
+<!-- ======== SCREEN: RANKING ======== -->
+<div id="screen-ranking" class="screen">
+  <div class="app-header">
+    <span class="logo">&#127942;</span>
+    <div>
+      <h1>Ranking<small>Resultados en vivo</small></h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-sm btn-ghost" onclick="window.location.reload()">&#8635;</button>
+      <button class="btn btn-sm btn-ghost" onclick="irHome()">Inicio</button>
+    </div>
+  </div>
+  <div class="content" style="padding:1rem;max-width:600px;margin:0 auto;width:100%">
+    <div id="ranking-lista"></div>
+    <div style="margin-top:1rem;text-align:center;font-size:.75rem;color:var(--muted)" id="ranking-ts"></div>
+  </div>
+</div>
+
+<!-- ======== MODAL: CARRIL ======== -->
+<div id="modal-carril" class="modal-ov">
+  <div class="modal-box">
+    <div class="modal-title">&#127946; <span id="modal-carril-titulo">Nuevo carril</span></div>
+    <div class="input-group">
+      <label>Nombre del carril</label>
+      <input class="inp" id="mc-nombre" placeholder="Ej: Equipo Tiburones" autocomplete="off">
+    </div>
+    <div class="input-group">
+      <label>Nadadores</label>
+      <div class="selected-tags" id="mc-tags"></div>
+      <div class="search-wrap">
+        <span class="search-ico">&#128269;</span>
+        <input class="inp" id="mc-buscar" placeholder="Buscar nadador..." autocomplete="off" oninput="filtrarNadadores()">
+      </div>
+      <div class="swimmers-list" id="mc-lista"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="cerrarModalCarril()">Cancelar</button>
+      <button class="btn btn-primary" id="mc-save-btn">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== MODAL: PIN ======== -->
+<div id="modal-pin" class="modal-ov">
+  <div class="modal-box" style="max-width:320px;text-align:center">
+    <div class="modal-title" style="justify-content:center">&#128274; PIN de administrador</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-pad" id="pin-pad"></div>
+    <div class="pin-error" id="pin-err"></div>
+    <button class="btn btn-ghost" style="margin-top:.8rem;width:100%" onclick="cerrarPin()">Cancelar</button>
+  </div>
+</div>
+
+<div id="confetti-wrap" class="confetti-wrap"></div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   CONFIG SUPABASE
+   ============================================================ */
+var SB_URL='https://xpzpbekysaaymlrugetq.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwenBiZWt5c2FheW1scnVnZXRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3MTU1NTUsImV4cCI6MjEwODI5MTU1NX0.mZ69HlwCiUtHmrEV0Mt5Vr0ugnlSbhjyQ7m7NQt83Cs';
+var ADMIN_PIN='1234'; /* se sobreescribe con el PIN guardado en Supabase */
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+var _carriles=[]; /* [{id,nombre,nadadores:[],vueltas:0}] */
+var _nadadores=[]; /* inscritos cargados de Supabase */
+var _nadSeleccionados=[]; /* ids seleccionados en el modal */
+var _editandoId=null;
+var _currentCarrilId=null; /* carril abierto en pantalla contador */
+var _pinAccion=null; /* 'setup'|'reset'|'delete' */
+var _pinAccionData=null;
+var _pinVal='';
+var _pinTries=0;
+var _rankPoll=null;
+
+/* ============================================================
+   SUPABASE FETCH
+   ============================================================ */
+function sbFetch(method,path,body){
+  var hasBody=body!=null&&method!=='GET'&&method!=='HEAD'&&method!=='DELETE';
+  return fetch(SB_URL+'/rest/v1/'+path,{
+    method:method,
+    headers:{
+      'apikey':SB_KEY,
+      'Authorization':'Bearer '+SB_KEY,
+      'Content-Type':'application/json',
+      'Prefer':'return=representation'
+    },
+    body:hasBody?JSON.stringify(body):undefined
+  });
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+var _toastTimer=null;
+function toast(msg,color){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=color||'#1e3a5f';
+  t.classList.add('show');
+  if(_toastTimer)clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(function(){t.classList.remove('show');},2500);
+}
+
+/* ============================================================
+   NAVEGACION
+   ============================================================ */
+function mostrarScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+function irHome(){
+  detenerPollRanking();
+  _currentCarrilId=null;
+  mostrarScreen('screen-home');
+}
+
+function irSetup(){
+  /* requiere PIN */
+  pedirPinAccion('setup',null);
+}
+
+function irSetupDirecto(){
+  cargarCarriles();
+  mostrarScreen('screen-setup');
+}
+
+function irRanking(){
+  renderRanking();
+  mostrarScreen('screen-ranking');
+  iniciarPollRanking();
+}
+
+function irContador(id){
+  _currentCarrilId=id;
+  renderContador();
+  mostrarScreen('screen-carril');
+  iniciarPollRanking();
+}
+
+/* ============================================================
+   CARGA DATOS
+   ============================================================ */
+function cargarNadadores(){
+  /* carga inscritos de la tabla inscripciones */
+  sbFetch('GET','inscripciones?select=id,nombre,categoria&order=nombre.asc').then(function(r){return r.json();}).then(function(data){
+    _nadadores=Array.isArray(data)?data:[];
+    filtrarNadadores();
+  }).catch(function(){
+    /* fallback: si no hay tabla inscripciones, mostrar aviso */
+    _nadadores=[];
+    filtrarNadadores();
+  });
+}
+
+function cargarCarriles(){
+  sbFetch('GET','carriles?order=numero.asc').then(function(r){return r.json();}).then(function(data){
+    _carriles=Array.isArray(data)?data:[];
+    renderCarriles();
+  }).catch(function(){
+    _carriles=[];
+    renderCarriles();
+    toast('No se pudo conectar con Supabase','#7f1d1d');
+  });
+}
+
+function cargarConfigPin(){
+  sbFetch('GET','config?key=eq.site_data&select=value').then(function(r){return r.json();}).then(function(rows){
+    if(rows&&rows.length&&rows[0].value&&rows[0].value.adminPin){
+      ADMIN_PIN=rows[0].value.adminPin;
+    }
+  }).catch(function(){});
+}
+
+/* ============================================================
+   RENDER CARRILES (SETUP)
+   ============================================================ */
+function renderCarriles(){
+  var cont=document.getElementById('carriles-lista');
+  if(!_carriles.length){
+    cont.innerHTML='<div class="empty-msg">Sin carriles creados. Pulsa \"+ Nuevo carril\" para empezar.</div>';
+    return;
+  }
+  cont.innerHTML=_carriles.map(function(c,i){
+    var nads=(c.nadadores||[]).join(', ')||'Sin nadadores';
+    return '<div class="carril-item">'+
+      '<div class="carril-num">'+(c.numero||i+1)+'</div>'+
+      '<div class="carril-info">'+
+        '<div class="carril-name">'+esc(c.nombre)+'</div>'+
+        '<div class="carril-swimmers">'+esc(nads)+'</div>'+
+      '</div>'+
+      '<div class="carril-actions">'+
+        '<button class="btn btn-ghost btn-sm btn-icon" data-accion="abrir" data-id="'+c.id+'" title="Contar vueltas">▶</button>'+
+        '<button class="btn btn-ghost btn-sm btn-icon" data-accion="editar" data-id="'+c.id+'" title="Editar">✏</button>'+
+        '<button class="btn btn-danger btn-sm btn-icon" data-accion="borrar" data-id="'+c.id+'" title="Eliminar">×</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  cont.onclick=function(ev){
+    var btn=ev.target.closest('[data-accion]');
+    if(!btn)return;
+    var accion=btn.getAttribute('data-accion');
+    var id=btn.getAttribute('data-id');
+    if(accion==='abrir')irContador(id);
+    else if(accion==='editar')abrirModalCarril(id);
+    else if(accion==='borrar')pedirPinAccion('delete',id);
+  };
+}
+
+/* ============================================================
+   MODAL CARRIL
+   ============================================================ */
+function abrirModalCarril(id){
+  _editandoId=id;
+  _nadSeleccionados=[];
+  var c=id?(_carriles.find(function(x){return x.id===id;})||null):null;
+  document.getElementById('modal-carril-titulo').textContent=id?'Editar carril':'Nuevo carril';
+  document.getElementById('mc-nombre').value=c?c.nombre:'';
+  if(c&&c.nadadores)_nadSeleccionados=c.nadadores.slice();
+  document.getElementById('mc-buscar').value='';
+  cargarNadadores();
+  renderTagsSeleccionados();
+  document.getElementById('modal-carril').classList.add('open');
+  setTimeout(function(){
+    document.getElementById('mc-save-btn').onclick=function(){guardarCarril();};
+    var ni=document.getElementById('mc-nombre');if(ni)ni.focus();
+  },0);
+}
+
+function cerrarModalCarril(){
+  document.getElementById('modal-carril').classList.remove('open');
+  _editandoId=null;
+  _nadSeleccionados=[];
+}
+
+function filtrarNadadores(){
+  var q=(document.getElementById('mc-buscar').value||'').toLowerCase().trim();
+  var lista=document.getElementById('mc-lista');
+  if(!lista)return;
+  var filtrados=q?_nadadores.filter(function(n){return (n.nombre||'').toLowerCase().includes(q);}):_nadadores;
+  if(!filtrados.length){
+    lista.innerHTML='<div class="empty-msg">'+(q?'Sin resultados para "'+esc(q)+'"':'No hay inscritos cargados.')+'</div>';
+    return;
+  }
+  lista.innerHTML=filtrados.map(function(n){
+    var sel=_nadSeleccionados.includes(n.nombre);
+    return '<div class="swimmer-opt'+(sel?' selected':'')+'" data-name="'+esc(n.nombre)+'">'+
+      '<div class="s-check">'+(sel?'✓':'')+'</div>'+
+      '<div class="s-name">'+esc(n.nombre)+' <span style="color:var(--muted);font-size:.72rem">('+esc(n.categoria||'')+')</span></div>'+
+    '</div>';
+  }).join('');
+  lista.onclick=function(ev){
+    var opt=ev.target.closest('.swimmer-opt');
+    if(!opt)return;
+    var name=opt.getAttribute('data-name');
+    var idx=_nadSeleccionados.indexOf(name);
+    if(idx>=0)_nadSeleccionados.splice(idx,1);
+    else _nadSeleccionados.push(name);
+    renderTagsSeleccionados();
+    filtrarNadadores();
+  };
+}
+
+function renderTagsSeleccionados(){
+  var cont=document.getElementById('mc-tags');
+  if(!cont)return;
+  if(!_nadSeleccionados.length){
+    cont.innerHTML='<span style="font-size:.75rem;color:var(--muted)">Ninguno seleccionado</span>';
+    return;
+  }
+  cont.innerHTML=_nadSeleccionados.map(function(n){
+    return '<span class="tag" data-name="'+esc(n)+'">'+esc(n)+' <span class="tag-x">×</span></span>';
+  }).join('');
+  cont.onclick=function(ev){
+    var tag=ev.target.closest('.tag');
+    if(!tag)return;
+    var name=tag.getAttribute('data-name');
+    _nadSeleccionados=_nadSeleccionados.filter(function(x){return x!==name;});
+    renderTagsSeleccionados();
+    filtrarNadadores();
+  };
+}
+
+function guardarCarril(){
+  var nombre=(document.getElementById('mc-nombre').value||'').trim();
+  if(!nombre){toast('Escribe el nombre del carril','#7f1d1d');return;}
+  var numero=_editandoId?(_carriles.find(function(c){return c.id===_editandoId;})||{}).numero||1:_carriles.length+1;
+  var payload={nombre:nombre,nadadores:_nadSeleccionados.slice(),vueltas:0,numero:numero};
+  var p=_editandoId?sbFetch('PATCH','carriles?id=eq.'+_editandoId,{nombre:nombre,nadadores:_nadSeleccionados.slice()}):sbFetch('POST','carriles',payload);
+  p.then(function(r){
+    if(!r.ok)return r.text().then(function(t){toast('Error '+r.status+': '+t.substring(0,80),'#7f1d1d');});
+    cerrarModalCarril();cargarCarriles();toast('Carril guardado','#166534');
+  }).catch(function(e){toast('Error: '+e.message,'#7f1d1d');});
+}
+
+/* ============================================================
+   ELIMINAR CARRIL
+   ============================================================ */
+function borrarCarril(id){
+  sbFetch('DELETE','carriles?id=eq.'+id).then(function(r){
+    if(!r.ok)return r.text().then(function(t){toast('Error '+r.status,'#7f1d1d');});
+    cargarCarriles();toast('Carril eliminado','#166534');
+  }).catch(function(){toast('Error al eliminar','#7f1d1d');});
+}
+
+/* ============================================================
+   RESET VUELTAS
+   ============================================================ */
+function resetearVueltas(){
+  if(!_carriles.length){toast('No hay carriles que resetear','#7f1d1d');return;}
+  Promise.all(_carriles.map(function(c){
+    return sbFetch('PATCH','carriles?id=eq.'+c.id,{vueltas:0});
+  })).then(function(){
+    cargarCarriles();
+    if(_currentCarrilId)renderContador();
+    renderRanking();
+    lanzarConfetti('#ef4444');
+    toast('Vueltas reseteadas','#166534');
+  }).catch(function(){toast('Error al resetear','#7f1d1d');});
+}
+
+/* ============================================================
+   CONTADOR
+   ============================================================ */
+function carrilActual(){
+  return _carriles.find(function(c){return c.id===_currentCarrilId;})||null;
+}
+
+function renderContador(){
+  var c=carrilActual();
+  if(!c){irHome();return;}
+  document.getElementById('cnt-carril-name').textContent=c.nombre;
+  var nads=(c.nadadores||[]).join(', ')||'Sin nadadores';
+  document.getElementById('cnt-carril-swimmers').textContent=nads;
+  var v=c.vueltas||0;
+  document.getElementById('cnt-num').textContent=v;
+  document.getElementById('cnt-unit-s').textContent=v===1?'':'s';
+  renderRankingMini();
+}
+
+function sumarVuelta(){
+  var c=carrilActual();
+  if(!c)return;
+  var nuevas=(c.vueltas||0)+1;
+  c.vueltas=nuevas; /* optimista */
+  renderContador();
+  animarPlus();
+  sbFetch('PATCH','carriles?id=eq.'+c.id,{vueltas:nuevas}).then(function(r){
+    if(!r.ok){c.vueltas=nuevas-1;renderContador();toast('Error al guardar','#7f1d1d');}
+  }).catch(function(){c.vueltas=nuevas-1;renderContador();toast('Error de red','#7f1d1d');});
+}
+
+function restarVuelta(){
+  var c=carrilActual();
+  if(!c)return;
+  var v=c.vueltas||0;
+  if(v<=0){toast('Ya está en 0','#7f1d1d');return;}
+  var nuevas=v-1;
+  c.vueltas=nuevas;
+  renderContador();
+  sbFetch('PATCH','carriles?id=eq.'+c.id,{vueltas:nuevas}).then(function(r){
+    if(!r.ok){c.vueltas=v;renderContador();}
+  }).catch(function(){c.vueltas=v;renderContador();});
+}
+
+function animarPlus(){
+  var btn=document.getElementById('btn-plus');
+  btn.classList.add('pressed');
+  setTimeout(function(){btn.classList.remove('pressed');},150);
+  /* flash number */
+  var num=document.getElementById('cnt-num');
+  num.style.color='var(--gold)';
+  setTimeout(function(){num.style.color='';},300);
+}
+
+/* ============================================================
+   RANKING
+   ============================================================ */
+function rankingOrdenado(){
+  return _carriles.slice().sort(function(a,b){return (b.vueltas||0)-(a.vueltas||0);});
+}
+
+var MEDALS=['🥇','🥈','🥉'];
+
+function renderRanking(){
+  var lista=document.getElementById('ranking-lista');
+  var ts=document.getElementById('ranking-ts');
+  if(!lista)return;
+  var sorted=rankingOrdenado();
+  if(!sorted.length){
+    lista.innerHTML='<div class="empty-msg" style="margin-top:2rem">No hay carriles todavía.<br>El admin debe crearlos primero.</div>';
+    if(ts)ts.textContent='';
+    return;
+  }
+  lista.innerHTML='<div class="ranking-card">'+sorted.map(function(c,i){
+    var medal=MEDALS[i]||'#'+(i+1);
+    var nads=(c.nadadores||[]).join(', ')||'Sin nadadores';
+    return '<div class="ranking-row pos-'+(i+1)+'">'+
+      '<div class="rank-medal">'+medal+'</div>'+
+      '<div class="rank-info">'+
+        '<div class="rank-name">'+esc(c.nombre)+'</div>'+
+        '<div class="rank-swimmers">'+esc(nads)+'</div>'+
+      '</div>'+
+      '<div class="rank-vueltas">'+(c.vueltas||0)+'<small>vueltas</small></div>'+
+    '</div>';
+  }).join('')+'</div>';
+  if(ts)ts.textContent='Actualizado: '+new Date().toLocaleTimeString('es-MX');
+}
+
+function renderRankingMini(){
+  var cont=document.getElementById('cnt-ranking');
+  if(!cont)return;
+  var sorted=rankingOrdenado();
+  cont.innerHTML=sorted.slice(0,5).map(function(c,i){
+    var isCurrent=c.id===_currentCarrilId;
+    return '<div class="r-row'+(isCurrent?' active-row':'')+'">'+
+      '<div class="r-pos">'+(MEDALS[i]||i+1)+'</div>'+
+      '<div class="r-name">'+esc(c.nombre)+'</div>'+
+      '<div class="r-vueltas">'+(c.vueltas||0)+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+/* polling cada 4 s para actualizar ranking */
+function iniciarPollRanking(){
+  detenerPollRanking();
+  _rankPoll=setInterval(function(){
+    sbFetch('GET','carriles?order=vueltas.desc').then(function(r){return r.json();}).then(function(data){
+      if(!Array.isArray(data))return;
+      /* merge vueltas remotas en _carriles sin perder orden */
+      data.forEach(function(remote){
+        var local=_carriles.find(function(c){return c.id===remote.id;});
+        if(local)local.vueltas=remote.vueltas||0;
+      });
+      var screen=document.querySelector('.screen.active');
+      if(screen&&screen.id==='screen-ranking')renderRanking();
+      if(screen&&screen.id==='screen-carril'){renderContador();}
+    }).catch(function(){});
+  },4000);
+}
+
+function detenerPollRanking(){
+  if(_rankPoll){clearInterval(_rankPoll);_rankPoll=null;}
+}
+
+/* ============================================================
+   PIN MODAL
+   ============================================================ */
+function pedirPinAccion(accion,data){
+  _pinAccion=accion;
+  _pinAccionData=data;
+  _pinVal='';
+  _pinTries=0;
+  document.getElementById('pin-err').textContent='';
+  actualizarDotesPin();
+  renderPinPad();
+  document.getElementById('modal-pin').classList.add('open');
+}
+
+function cerrarPin(){
+  document.getElementById('modal-pin').classList.remove('open');
+  _pinAccion=null;_pinAccionData=null;_pinVal='';
+}
+
+function renderPinPad(){
+  var pad=document.getElementById('pin-pad');
+  var keys=['1','2','3','4','5','6','7','8','9','','0','⌫'];
+  pad.innerHTML=keys.map(function(k){
+    if(!k)return '<div></div>';
+    return '<div class="pin-key" data-k="'+k+'">'+k+'</div>';
+  }).join('');
+  pad.onclick=function(ev){
+    var key=ev.target.closest('.pin-key');
+    if(!key)return;
+    var k=key.getAttribute('data-k');
+    if(k==='⌫'){_pinVal=_pinVal.slice(0,-1);}
+    else if(_pinVal.length<4){_pinVal+=k;}
+    actualizarDotesPin();
+    if(_pinVal.length===4)setTimeout(verificarPin,200);
+  };
+}
+
+function actualizarDotesPin(){
+  for(var i=0;i<4;i++){
+    var d=document.getElementById('pd'+i);
+    if(d)d.className='pin-dot'+(i<_pinVal.length?' filled':'');
+  }
+}
+
+function verificarPin(){
+  if(_pinVal===ADMIN_PIN){
+    cerrarPin();
+    ejecutarAccionPin();
+  } else {
+    _pinTries++;
+    _pinVal='';
+    actualizarDotesPin();
+    document.getElementById('pin-err').textContent=_pinTries>=3?'⛔ Demasiados intentos':'❌ PIN incorrecto';
+    if(_pinTries>=3){
+      setTimeout(function(){
+        cerrarPin();
+        document.getElementById('pin-err').textContent='';
+      },2000);
+    }
+  }
+}
+
+function ejecutarAccionPin(){
+  if(_pinAccion==='setup'){irSetupDirecto();}
+  else if(_pinAccion==='reset'){resetearVueltas();}
+  else if(_pinAccion==='delete'&&_pinAccionData){borrarCarril(_pinAccionData);}
+}
+
+/* ============================================================
+   ESCAPE HTML
+   ============================================================ */
+function esc(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+function lanzarConfetti(color){
+  var wrap=document.getElementById('confetti-wrap');
+  var colors=color?[color]:['#f5c518','#1559b0','#22c55e','#ef4444','#a855f7'];
+  for(var i=0;i<40;i++){
+    var d=document.createElement('div');
+    d.className='confetti-piece';
+    var c=colors[Math.floor(Math.random()*colors.length)];
+    var x=Math.random()*100;
+    var delay=Math.random()*0.8;
+    var dur=1.5+Math.random()*1.5;
+    var rot=Math.random()*360;
+    d.style.cssText='left:'+x+'vw;background:'+c+';animation-duration:'+dur+'s;animation-delay:'+delay+'s;transform:rotate('+rot+'deg)';
+    wrap.appendChild(d);
+  }
+  setTimeout(function(){wrap.innerHTML='';},4000);
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded',function(){
+  cargarConfigPin();
+});
+</script>
+</body>
+</html>
